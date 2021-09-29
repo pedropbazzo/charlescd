@@ -2,7 +2,7 @@ name: charlescd-ci-alpha-images
 
 on:
   push:
-    branches: [ main,fix-ci-image ]
+    branches: [ main]
 
 jobs:
   build_and_push_alpha_butler:
