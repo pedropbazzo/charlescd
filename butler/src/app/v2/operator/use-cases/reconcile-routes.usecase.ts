@@ -83,6 +83,7 @@ export class ReconcileRoutesUsecase {
         ...this.createIstioManifests(componentName, namespace, componentsNameMap[componentName])
       )
     }
+    this.consoleLoggerService.log('GENERATED_PROXY_MANIFESTS', proxyManifests)
     return proxyManifests
   }
 
@@ -91,9 +92,8 @@ export class ReconcileRoutesUsecase {
     namespace: string,
     componentsByName: ComponentEntityV2[]
   ): (VirtualServiceSpec | DestinationRuleSpec)[] {
-    this.consoleLoggerService.log('ACTIVE_COMPONENTS_BY_NAME', componentsByName)
     const lastComponentSnapshot = this.getLastComponentSnapshot(componentsByName)
-    this.consoleLoggerService.log('LAST_SNAPSHOT', lastComponentSnapshot)
+    this.consoleLoggerService.log('LAST_COMPONENT_SNAPSHOT', lastComponentSnapshot)
     const destinationRules =
       IstioDeploymentManifestsUtils.getDestinationRulesManifest(componentName, namespace, componentsByName)
     const virtualService =
