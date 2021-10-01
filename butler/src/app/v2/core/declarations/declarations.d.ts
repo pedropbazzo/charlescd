@@ -15,3 +15,4 @@
  */
 
 declare module 'hpropagate'
+declare module 'bunyan-debug-stream'

@@ -18,50 +18,43 @@
 
 import { Injectable } from '@nestjs/common'
 import * as winston from 'winston'
+import * as bunyan from 'bunyan'
 import * as rTracer from 'cls-rtracer'
 import * as stackTrace from 'stack-trace'
+import * as bunyanDebugStream from 'bunyan-debug-stream'
 
 @Injectable()
 export class ConsoleLoggerService {
 
-  private logger: winston.Logger
+  private logger: bunyan
 
   constructor() {
     this.logger = ConsoleLoggerService.createLogger()
   }
 
-  private static createLogger(): winston.Logger {
+  private static createLogger(): bunyan {
 
-    return winston.createLogger({
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        this.jsonFormat(),
-      ),
-      transports: [
-        new winston.transports.Console()
-      ]
+    return bunyan.createLogger({
+      name: 'butler',
+      streams: [{
+        level:  'info',
+        type:   'raw',
+        stream: bunyanDebugStream({
+          basepath: process.cwd(), // this should be the root folder of your project.
+          forceColor: true
+        })
+      }],
+      serializers: bunyanDebugStream.serializers
     })
   }
 
-  private static jsonFormat() {
-    return winston.format.printf(({ timestamp, level, message, ...data }) => {
-
-      return JSON.stringify({
-        requestId: rTracer.id(),
-        timestamp,
-        level,
-        message,
-        ...data,
-      })
-    })
-  }
 
   public log(
     message: string,
     messageObject?: any
   ): void {
     if (process.env.NODE_ENV !== 'test') {
-      this.logger.log('info', message, this.getDataTrace(messageObject))
+      this.logger.info(this.getDataTrace(messageObject), message)
     }
   }
 
@@ -70,7 +63,7 @@ export class ConsoleLoggerService {
     errorObject?: any
   ): void {
     if (process.env.NODE_ENV !== 'test') {
-      this.logger.log('error', error, { error: JSON.stringify(errorObject, errorObject != null ? Object.getOwnPropertyNames(errorObject) : null) })
+      this.logger.error({ error: JSON.stringify(errorObject, errorObject != null ? Object.getOwnPropertyNames(errorObject) : null) }, error)
     }
   }
 

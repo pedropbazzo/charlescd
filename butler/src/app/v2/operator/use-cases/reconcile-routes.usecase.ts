@@ -31,6 +31,7 @@ import { DeploymentStatusEnum } from '../../api/deployments/enums/deployment-sta
 import { NotificationStatusEnum } from '../../core/enums/notification-status.enum'
 import { ExecutionRepository } from '../../api/deployments/repository/execution.repository'
 import { MooveService } from '../../core/integrations/moove'
+import { last } from 'rxjs/operators'
 
 @Injectable()
 export class ReconcileRoutesUsecase {
@@ -90,8 +91,9 @@ export class ReconcileRoutesUsecase {
     namespace: string,
     componentsByName: ComponentEntityV2[]
   ): (VirtualServiceSpec | DestinationRuleSpec)[] {
-
+    this.consoleLoggerService.log('ACTIVE_COMPONENTS_BY_NAME', componentsByName)
     const lastComponentSnapshot = this.getLastComponentSnapshot(componentsByName)
+    this.consoleLoggerService.log('LAST_SNAPSHOT', lastComponentSnapshot)
     const destinationRules =
       IstioDeploymentManifestsUtils.getDestinationRulesManifest(componentName, namespace, componentsByName)
     const virtualService =
@@ -102,6 +104,7 @@ export class ReconcileRoutesUsecase {
   }
 
   private getLastComponentSnapshot(components: ComponentEntityV2[]): ComponentEntityV2 {
+
     const sortedArray = [...components].sort(ReconcileUtils.getCreatedAtTimeDiff)
     return sortedArray[sortedArray.length - 1]
   }
