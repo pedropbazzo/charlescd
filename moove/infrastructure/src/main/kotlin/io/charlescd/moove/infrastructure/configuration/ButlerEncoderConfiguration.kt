@@ -28,7 +28,7 @@ import org.springframework.core.io.ResourceLoader
 
 @Configuration
 class ButlerEncoderConfiguration(
-    @Value("\${key.store.password}")
+    @Value("\${key.store.password:moove}")
     val keyStorePassword: String,
     @Value("\${butler.tls.store.path}")
     val butlerStorePath: String,
