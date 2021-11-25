@@ -25,6 +25,7 @@ import org.springframework.cloud.commons.httpclient.OkHttpClientFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ResourceLoader
+import java.util.*
 
 @Configuration
 class ButlerEncoderConfiguration(
@@ -53,6 +54,12 @@ class ButlerEncoderConfiguration(
     }
 
     fun getSSLSocketFactory(): SSLSocketFactory {
+        val systemProps = System.getProperties();
+        systemProps["javax.net.ssl.keyStorePassword"] = keyStorePassword;
+        systemProps["javax.net.ssl.keyStore"] = mooveStorePath;
+        systemProps["javax.net.ssl.trustStore"] = butlerStorePath;
+        systemProps["javax.net.ssl.trustStorePassword"] = keyStorePassword;
+        System.setProperties(systemProps);
         val mooveStore = loadFromFile(mooveStorePath)
         val butlerKeyStore = loadFromFile(butlerStorePath)
         val sslContext = SSLContexts.custom().loadKeyMaterial(
