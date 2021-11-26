@@ -6,4 +6,4 @@ ENV APP web.jar
 RUN mkdir -p /opt
 COPY ${APP_TARGET}/${APP} /opt
 
-ENTRYPOINT exec java  -Dcom.sun.security.enableAIAcaIssuers=true ${JAVA_AGENT} ${JAVA_OPTS} ${MEM_PARAMS} -jar /opt/${APP}
+ENTRYPOINT exec java -Djavax.net.debug=all ${JAVA_AGENT} ${JAVA_OPTS} ${MEM_PARAMS} -jar /opt/${APP}
