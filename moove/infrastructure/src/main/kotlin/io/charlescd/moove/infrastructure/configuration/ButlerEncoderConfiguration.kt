@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ResourceLoader
 import java.util.*
+import javax.net.ssl.SSLContext
 
 @Configuration
 class ButlerEncoderConfiguration(
@@ -33,6 +34,8 @@ class ButlerEncoderConfiguration(
     val keyStorePassword: String,
     @Value("\${butler.tls.store.path}")
     val butlerStorePath: String,
+    @Value("\${client.tls.store.path}")
+    val clientStorePath: String,
     @Value("\${moove.tls.store.path}")
     val mooveStorePath: String,
     @Value("\${mtls.enabled:false}")
@@ -54,19 +57,23 @@ class ButlerEncoderConfiguration(
     }
 
     fun getSSLSocketFactory(): SSLSocketFactory {
-        val systemProps = System.getProperties();
-        systemProps["javax.net.ssl.keyStorePassword"] = keyStorePassword;
-        systemProps["javax.net.ssl.keyStore"] = mooveStorePath;
-        systemProps["javax.net.ssl.trustStore"] = butlerStorePath;
-        systemProps["javax.net.ssl.trustStorePassword"] = keyStorePassword;
-        System.setProperties(systemProps);
+        var sslContext: SSLContext
+        val clientStore = loadFromFile(clientStorePath)
         val mooveStore = loadFromFile(mooveStorePath)
         val butlerKeyStore = loadFromFile(butlerStorePath)
-        val sslContext = SSLContexts.custom().loadKeyMaterial(
-            mooveStore.file, keyStorePassword.toCharArray(), keyStorePassword.toCharArray()
-        ).loadTrustMaterial(
-            butlerKeyStore.file, keyStorePassword.toCharArray()
-        ).build()
+        sslContext = if (clientStore.exists()){
+            SSLContexts.custom().loadKeyMaterial(
+                mooveStore.file, keyStorePassword.toCharArray(), keyStorePassword.toCharArray()
+            ).loadTrustMaterial(
+                butlerKeyStore.file, keyStorePassword.toCharArray()
+            ).loadTrustMaterial(clientStore.file, keyStorePassword.toCharArray()).build()
+        } else {
+            SSLContexts.custom().loadKeyMaterial(
+                mooveStore.file, keyStorePassword.toCharArray(), keyStorePassword.toCharArray()
+            ).loadTrustMaterial(
+                butlerKeyStore.file, keyStorePassword.toCharArray()
+            ).build()
+        }
 
         return sslContext.socketFactory
     }
