@@ -46,7 +46,7 @@ jobs:
             ${{ runner.os }}-go-
 
       - name: Set up Go
-        uses: actions/setup-go@331ce1d993939866bb63c32c6cbbfd48fa76fc57
+        uses: actions/setup-go@02f7ea9f09887fd7fd6c77c49a0f72a2e8cde95c
         with:
           go-version: "1.15"
 
