@@ -135,7 +135,7 @@ CharlesApplications:
         # -- Port Number
           port: 8080
     # -- Replica Count
-    replicaCount: 1
+    replicaCount: 1 
     resources:
       limits:
         # -- Resource CPU Limit
